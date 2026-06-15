@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -5,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1565C0">
   <title>همراه ناظر</title>
-  <link rel="manifest" href="manifest.json">
+ <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
@@ -26,7 +27,7 @@
       --border:     #d0d9e8;
       --nav-h:      52px;
       --tab-h:      50px;
-      --panel-h:    44vh;
+      --panel-h:    32vh;
       --radius:     12px;
       --shadow:     0 2px 12px rgba(0,0,0,.10);
     }
@@ -77,6 +78,10 @@
       display: flex;
       flex-shrink: 0;
       z-index: 400;
+      position: sticky;
+      bottom: 0;
+      top: auto;
+      order: 3;
     }
     .tab-btn {
       flex: 1;
@@ -174,24 +179,6 @@
     .upload-zone input { display:none; }
     .upload-hint { font-size:.7rem; margin-top:6px; color:var(--text-muted); }
 
-    .chip-scroll { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
-    .chip-scroll::-webkit-scrollbar { display:none; }
-    .loc-chip {
-      padding: 5px 12px;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      background: var(--surface2);
-      color: var(--text);
-      white-space: nowrap;
-      font-size: .75rem;
-      cursor: pointer;
-      transition: all .2s;
-      flex-shrink: 0;
-    }
-    .loc-chip.active  { background:var(--primary);  color:#fff; border-color:var(--primary); }
-    .loc-chip.done    { background:var(--success);   color:#fff; border-color:var(--success); }
-    .loc-chip.review  { background:var(--warning);   color:#fff; border-color:var(--warning); }
-
     .detail-card {
       background: var(--surface2);
       border-radius: var(--radius);
@@ -265,6 +252,7 @@
       overflow-y: auto;
       padding: 14px;
       gap: 12px;
+      padding-bottom: 70px;
     }
     .report-header {
       background: var(--primary);
@@ -305,13 +293,22 @@
       align-items:center;
       gap:10px;
       box-shadow:0 1px 4px rgba(0,0,0,.07);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .report-item:hover {
+      transform: translateX(-4px);
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
     .report-num {
-      width:28px; height:28px; border-radius:50%;
-      background:var(--primary); color:#fff;
+      width:32px; height:32px; border-radius:50%;
       display:flex; align-items:center; justify-content:center;
-      font-size:.7rem; font-weight:700; flex-shrink:0;
+      font-size:.75rem; font-weight:700; flex-shrink:0;
     }
+    .report-num.done { background:var(--success); color:#fff; }
+    .report-num.review { background:var(--warning); color:#fff; }
+    .report-num.pending { background:var(--text-muted); color:#fff; }
+    .report-num.active { background:var(--primary); color:#fff; box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--primary); }
     .report-item-info { flex:1; min-width:0; }
     .report-item-name { font-weight:700; font-size:.83rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .report-item-note { font-size:.72rem; color:var(--text-muted); margin-top:2px; }
@@ -336,11 +333,12 @@
     /* ───── Map Markers ───── */
     .custom-div-icon { background:transparent; border:none; }
     .mc {
-      width:30px; height:30px; border-radius:50%;
+      width:32px; height:32px; border-radius:50%;
       display:flex; align-items:center; justify-content:center;
-      font-size:11px; font-weight:700; color:#fff;
+      font-size:12px; font-weight:700; color:#fff;
       border:2.5px solid rgba(255,255,255,.9);
       box-shadow:0 2px 6px rgba(0,0,0,.3);
+      transition: all 0.2s;
     }
     .mc.blue   { background:var(--primary,#1565c0); }
     .mc.orange { background:#f57c00; }
@@ -386,16 +384,6 @@
     <button class="btn-icon hidden" id="logout-btn" title="خروج"><i class="fas fa-sign-out-alt"></i></button>
   </div>
 </header>
-
-<!-- ═══════════════ TAB BAR ═══════════════ -->
-<nav class="tab-bar hidden" id="tab-bar">
-  <button class="tab-btn active" data-tab="screen-map">
-    <i class="fas fa-map"></i> نقشه
-  </button>
-  <button class="tab-btn" data-tab="screen-report">
-    <i class="fas fa-chart-bar"></i> گزارش
-  </button>
-</nav>
 
 <!-- ═══════════════ SCREEN: LOGIN ═══════════════ -->
 <div class="screen active" id="screen-login">
@@ -449,10 +437,6 @@
         </div>
       </div>
 
-      <!-- Location chips -->
-      <div class="section-title">نقاط بازرسی</div>
-      <div class="chip-scroll" id="target-chips"></div>
-
       <!-- Detail card -->
       <div class="detail-card" id="detail-card">
         <div class="detail-header">
@@ -490,10 +474,19 @@
     <label>پیشرفت کلی <span id="rpt-pct">۰٪</span></label>
     <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
-  <div class="section-title" style="margin-top:4px;">جزئیات نقاط</div>
+  <div class="section-title" style="margin-top:4px;">جزئیات نقاط (برای انتخاب کلیک کنید)</div>
   <div class="report-list" id="rpt-list"></div>
 </div>
 
+<!-- ═══════════════ TAB BAR (پایین صفحه) ═══════════════ -->
+<nav class="tab-bar hidden" id="tab-bar">
+  <button class="tab-btn active" data-tab="screen-map">
+    <i class="fas fa-map"></i> نقشه
+  </button>
+  <button class="tab-btn" data-tab="screen-report">
+    <i class="fas fa-chart-bar"></i> گزارش
+  </button>
+</nav>
 
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -518,7 +511,7 @@ const state = {
   user:           null,
   locations:      [],
   selectedIdx:    null,
-  currentNavIdx:  null,   // هدف فعلی ناوبری
+  currentNavIdx:  null,
   userLat:        null,
   userLon:        null,
   totalSeconds:   0,
@@ -541,7 +534,6 @@ const logoutBtn      = $('logout-btn');
 const themeToggle    = $('theme-toggle');
 const uploadSection  = $('upload-section');
 const inspSection    = $('inspection-section');
-const targetChips    = $('target-chips');
 const totalTimerEl   = $('total-timer');
 const pauseResumeBtn = $('pause-resume-btn');
 
@@ -552,7 +544,6 @@ themeToggle.addEventListener('click', () => {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
   themeToggle.innerHTML = dark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-  // تغییر تایل نقشه
   if (map && window._tileLayer) {
     map.removeLayer(window._tileLayer);
     window._tileLayer = L.tileLayer(
@@ -666,7 +657,14 @@ function loadSavedData() {
     showInspectionUI();
     startTimer();
     renderAll();
-    if (state.currentNavIdx !== null) updateNavHUD(state.currentNavIdx);
+    if (state.currentNavIdx !== null) {
+      drawRoute(state.currentNavIdx);
+      // همگام‌سازی selectedIdx با currentNavIdx
+      if (state.selectedIdx !== state.currentNavIdx) {
+        state.selectedIdx = state.currentNavIdx;
+        renderDetailPanel();
+      }
+    }
   }
 }
 
@@ -724,7 +722,6 @@ function processExcelData(rows) {
   state.selectedIdx   = null;
   state.currentNavIdx = null;
 
-  // مرتب‌سازی بر اساس نزدیک‌ترین به کاربر (اگر موقعیت داریم)
   pickNextTarget();
   showInspectionUI();
   startTimer();
@@ -737,7 +734,6 @@ function processExcelData(rows) {
 //  NAVIGATION TARGET LOGIC
 // ═══════════════════════════════════════════════════
 function pickNextTarget() {
-  // پیدا کن نزدیک‌ترین نقطه pending به کاربر
   const pending = state.locations
     .map((loc, idx) => ({ loc, idx }))
     .filter(({ loc }) => loc.status === 'pending');
@@ -757,16 +753,11 @@ function pickNextTarget() {
 
   const next = pending[0];
   state.currentNavIdx = next.idx;
-  state.selectedIdx   = next.idx;
+  state.selectedIdx = next.idx;  // همگام‌سازی خودکار
   drawRoute(next.idx);
   renderAll();
 }
 
-function updateNavHUD(idx) {
-  // HUD حذف شده، فقط مسیر کشیده می‌شود
-}
-
-// هر بار موقعیت آپدیت شد مسیر دوباره کشیده می‌شود
 function onUserPositionUpdate() {
   if (state.currentNavIdx !== null) {
     drawRoute(state.currentNavIdx);
@@ -794,20 +785,21 @@ function updateStatus(newStatus) {
 
   saveData();
   renderAll();
-  refreshPanelButtons();
 
   const msg = newStatus === 'done' ? '✅ انجام شد' : '⚠️ نیاز به بررسی';
   showToast(msg);
 
-  // اگه نقطه ثبت‌شده همون هدف ناوبری بود، بعد از ۰.۸ ثانیه برو به بعدی
-  if (idx === state.currentNavIdx) {
-    setTimeout(() => {
-      removeRoute();
-      pickNextTarget();
-      saveData();
-      renderAll();
-    }, 800);
-  }
+  // بعد از ثبت، بلافاصله به هدف بعدی برو
+  setTimeout(() => {
+    removeRoute();
+    pickNextTarget();
+    saveData();
+    renderAll();
+    // اگر در تب گزارش هستیم، آپدیت شود
+    if ($('screen-report').classList.contains('active')) {
+      renderReport();
+    }
+  }, 300);
 }
 
 function refreshPanelButtons() {
@@ -835,7 +827,7 @@ async function drawRoute(destIdx) {
     const url = `${OSRM_BASE}/${state.userLon},${state.userLat};${dest.lon},${dest.lat}?overview=full&geometries=geojson`;
     const res  = await fetch(url);
     const json = await res.json();
-    if (json.code !== 'Ok') return;
+    if (json.code !== 'Ok') throw new Error('Route not found');
 
     const coords  = json.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
     state.routeLayer = L.polyline(coords, {
@@ -843,7 +835,6 @@ async function drawRoute(destIdx) {
     }).addTo(map);
 
   } catch (err) {
-    // اگه اینترنت نبود fallback به خط مستقیم
     const dest = state.locations[destIdx];
     if (state.userLat !== null) {
       state.routeLayer = L.polyline(
@@ -867,10 +858,6 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function formatDist(m) {
-  return m >= 1000 ? `${(m/1000).toFixed(1)} کیلومتر` : `${Math.round(m)} متر`;
-}
-
 // ═══════════════════════════════════════════════════
 //  USER TRACKING
 // ═══════════════════════════════════════════════════
@@ -883,7 +870,6 @@ function startUserTracking() {
       state.userLat = lat;
       state.userLon = lon;
 
-      // نشان‌دهنده کاربر روی نقشه
       const userIcon = L.divIcon({ html: '<div class="user-dot"></div>', className: '', iconSize: [16,16], iconAnchor: [8,8] });
       if (userMarker) { userMarker.setLatLng([lat, lon]); }
       else { userMarker = L.marker([lat, lon], { icon: userIcon, zIndexOffset: 1000 }).addTo(map).bindPopup('📍 موقعیت شما'); }
@@ -904,24 +890,8 @@ function startUserTracking() {
 //  RENDER
 // ═══════════════════════════════════════════════════
 function renderAll() {
-  renderChips();
   renderMarkers();
   renderDetailPanel();
-}
-
-function renderChips() {
-  targetChips.innerHTML = '';
-  state.locations.forEach((loc, idx) => {
-    const num   = loc.bookmarkNum !== null ? loc.bookmarkNum : (idx + 1);
-    const chip  = document.createElement('div');
-    const isCur = idx === state.currentNavIdx;
-    const cls   = loc.status === 'done' ? 'done' : loc.status === 'review' ? 'review' : (isCur ? 'active' : '');
-    chip.className = `loc-chip ${cls}`;
-    chip.textContent = `${num}`;
-    chip.title = loc.name;
-    chip.addEventListener('click', () => { state.selectedIdx = idx; renderAll(); });
-    targetChips.appendChild(chip);
-  });
 }
 
 function renderMarkers() {
@@ -936,10 +906,20 @@ function renderMarkers() {
 
     const icon = L.divIcon({
       html: `<div class="mc ${colorClass}">${num}</div>`,
-      className: 'custom-div-icon', iconSize: [30,30], iconAnchor: [15,15]
+      className: 'custom-div-icon', iconSize: [32,32], iconAnchor: [16,16]
     });
     const m = L.marker([loc.lat, loc.lon], { icon }).addTo(markersGroup);
-    m.on('click', () => { state.selectedIdx = idx; renderAll(); });
+    m.on('click', () => { 
+      state.selectedIdx = idx; 
+      renderDetailPanel();
+      // اگر نقطه کلیک شده با هدف جاری متفاوت است، مسیر را آپدیت کن
+      if (idx !== state.currentNavIdx && loc.status === 'pending') {
+        state.currentNavIdx = idx;
+        drawRoute(idx);
+        showToast(`هدف تغییر کرد: ${loc.name}`);
+      }
+      renderMarkers(); // برای آپدیت هایلایت
+    });
   });
 }
 
@@ -964,7 +944,6 @@ function renderDetailPanel() {
     badge.className = 'status-badge s-pending';
   }
 
-  // تصاویر (فقط اگه URL دارن)
   const gallery = $('loc-images');
   gallery.innerHTML = '';
   [loc.img1, loc.img2, loc.img3].filter(u => u && u.trim()).forEach(url => {
@@ -1007,16 +986,34 @@ function renderReport() {
     const num = loc.bookmarkNum !== null ? loc.bookmarkNum : (idx + 1);
     const statusText  = loc.status === 'done' ? '✅ انجام شده' : loc.status === 'review' ? '⚠️ بررسی' : '⏳ در انتظار';
     const statusClass = loc.status === 'done' ? 'r-done' : loc.status === 'review' ? 'r-review' : 'r-pending';
+    let numClass = 'pending';
+    if (loc.status === 'done') numClass = 'done';
+    else if (loc.status === 'review') numClass = 'review';
+    if (idx === state.currentNavIdx && loc.status === 'pending') numClass = 'active';
+    
     const el = document.createElement('div');
     el.className = 'report-item';
     el.innerHTML = `
-      <div class="report-num">${num}</div>
+      <div class="report-num ${numClass}">${num}</div>
       <div class="report-item-info">
         <div class="report-item-name">${loc.name}</div>
         ${loc.note ? `<div class="report-item-note">📝 ${loc.note}</div>` : ''}
       </div>
       <div class="report-item-status ${statusClass}">${statusText}</div>
     `;
+    el.addEventListener('click', () => {
+      // رفتن به تب نقشه و انتخاب این نقطه
+      document.querySelector('.tab-btn[data-tab="screen-map"]').click();
+      setTimeout(() => {
+        state.selectedIdx = idx;
+        if (loc.status === 'pending') {
+          state.currentNavIdx = idx;
+          drawRoute(idx);
+        }
+        renderAll();
+        map.setView([loc.lat, loc.lon], 15);
+      }, 100);
+    });
     list.appendChild(el);
   });
 }
@@ -1098,7 +1095,7 @@ function generatePDF() {
           <th style="padding:8px;text-align:right;">یادداشت</th>
         </tr></thead>
         <tbody>${rows}</tbody>
-      <table>
+      </table>
     </div>
   `;
   html2pdf().from(el).set({
@@ -1122,3 +1119,4 @@ function showToast(msg) {
 </script>
 </body>
 </html>
+```
