@@ -152,61 +152,6 @@
       z-index: 1;
     }
 
-    /* ───── Navigation HUD (روی نقشه) ───── */
-    #nav-hud {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      left: 10px;
-      z-index: 300;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .hud-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      box-shadow: var(--shadow);
-      pointer-events: auto;
-      border: 1px solid var(--border);
-    }
-    .hud-dest {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .hud-dest-icon { font-size:1.3rem; flex-shrink:0; }
-    .hud-dest-info { flex:1; min-width:0; }
-    .hud-dest-name { font-weight:700; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .hud-dest-dist { font-size:.75rem; color:var(--text-muted); margin-top:1px; }
-    .hud-action-row { display:flex; gap:6px; margin-top:8px; }
-    .hud-btn {
-      flex:1; padding:7px 6px;
-      border:none; border-radius:8px;
-      font-family:inherit; font-size:.75rem; font-weight:700;
-      cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;
-    }
-    .hud-btn.done  { background:var(--success); color:#fff; }
-    .hud-btn.review{ background:var(--warning); color:#fff; }
-    .hud-btn.done:disabled { background:#a5d6a7; cursor:not-allowed; }
-    .hud-btn.voice { background: var(--primary); color:#fff; }
-    #nav-compass {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: .8rem;
-    }
-    .compass-arrow {
-      font-size: 1.6rem;
-      transition: transform .4s ease;
-      display: inline-block;
-    }
-    .compass-info { flex:1; }
-    .compass-bearing { font-weight:700; font-size:.9rem; }
-    .compass-eta { color:var(--text-muted); font-size:.75rem; }
-
     /* ───── Bottom Panel (Map) ───── */
     #map-panel {
       max-height: var(--panel-h);
@@ -425,20 +370,6 @@
       text-transform:uppercase; letter-spacing:.06em;
       margin-bottom:6px;
     }
-
-    /* Voice status indicator */
-    #voice-status {
-      position:absolute; bottom:8px; left:10px;
-      background:var(--primary); color:#fff;
-      border-radius:20px; padding:4px 10px;
-      font-size:.7rem; font-weight:700;
-      z-index:300; display:flex; align-items:center; gap:5px;
-      opacity:0; transition:opacity .3s;
-      pointer-events:none;
-    }
-    #voice-status.show { opacity:1; }
-    .voice-dot { width:7px; height:7px; background:#69f0ae; border-radius:50%; animation:pulse2 1s infinite; }
-    @keyframes pulse2 { 0%,100%{opacity:1;} 50%{opacity:.3;} }
   </style>
 </head>
 <body>
@@ -484,32 +415,6 @@
 
 <!-- ═══════════════ SCREEN: MAP ═══════════════ -->
 <div class="screen" id="screen-map" style="position:relative;">
-
-  <!-- Navigation HUD (روی نقشه) -->
-  <div id="nav-hud" class="hidden">
-    <div class="hud-card" id="hud-dest-card">
-      <div class="hud-dest">
-        <div class="hud-dest-icon">📍</div>
-        <div class="hud-dest-info">
-          <div class="hud-dest-name" id="hud-name">—</div>
-          <div class="hud-dest-dist" id="hud-dist">محاسبه...</div>
-        </div>
-        <button class="hud-btn voice" id="hud-voice-btn" style="flex-shrink:0;padding:6px 10px;"> <i class="fas fa-volume-up"></i></button>
-      </div>
-    </div>
-    <div class="hud-card" id="hud-compass-card">
-      <div id="nav-compass">
-        <span class="compass-arrow" id="compass-arrow">⬆️</span>
-        <div class="compass-info">
-          <div class="compass-bearing" id="compass-bearing">بارگذاری...</div>
-          <div class="compass-eta" id="compass-eta">—</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Voice status -->
-  <div id="voice-status"><div class="voice-dot"></div> <span id="voice-text">در حال خواندن...</span></div>
 
   <!-- Map -->
   <div id="map"></div>
@@ -618,7 +523,6 @@ const state = {
   userLon:        null,
   totalSeconds:   0,
   isPaused:       false,
-  voiceEnabled:   true,
   timerInterval:  null,
   routeLayer:     null,
 };
@@ -640,7 +544,6 @@ const inspSection    = $('inspection-section');
 const targetChips    = $('target-chips');
 const totalTimerEl   = $('total-timer');
 const pauseResumeBtn = $('pause-resume-btn');
-const navHud         = $('nav-hud');
 
 // ═══════════════════════════════════════════════════
 //  THEME
@@ -841,9 +744,7 @@ function pickNextTarget() {
 
   if (pending.length === 0) {
     state.currentNavIdx = null;
-    navHud.classList.add('hidden');
     showToast('🎉 همه نقاط بازرسی شدند!');
-    speak('همه نقاط بازرسی شدند. عملیات پایان یافت.');
     return;
   }
 
@@ -857,57 +758,28 @@ function pickNextTarget() {
   const next = pending[0];
   state.currentNavIdx = next.idx;
   state.selectedIdx   = next.idx;
-  updateNavHUD(next.idx);
   drawRoute(next.idx);
   renderAll();
 }
 
 function updateNavHUD(idx) {
-  const loc = state.locations[idx];
-  if (!loc) return;
-  navHud.classList.remove('hidden');
-
-  const displayNum = loc.bookmarkNum !== null ? loc.bookmarkNum : (idx + 1);
-  $('hud-name').textContent = `[${displayNum}] ${loc.name}`;
-
-  // فاصله
-  if (state.userLat !== null) {
-    const d = haversine(state.userLat, state.userLon, loc.lat, loc.lon);
-    $('hud-dist').textContent = formatDist(d);
-    updateCompass(loc.lat, loc.lon);
-  } else {
-    $('hud-dist').textContent = 'موقعیت شما نامشخص';
-  }
+  // HUD حذف شده، فقط مسیر کشیده می‌شود
 }
 
-// ─── هر بار موقعیت آپدیت شد HUD هم آپدیت می‌شه ───
+// هر بار موقعیت آپدیت شد مسیر دوباره کشیده می‌شود
 function onUserPositionUpdate() {
-  if (state.currentNavIdx !== null) updateNavHUD(state.currentNavIdx);
-  updateCompass(
-    state.currentNavIdx !== null ? state.locations[state.currentNavIdx]?.lat : null,
-    state.currentNavIdx !== null ? state.locations[state.currentNavIdx]?.lon : null,
-  );
+  if (state.currentNavIdx !== null) {
+    drawRoute(state.currentNavIdx);
+  }
 }
 
 // ═══════════════════════════════════════════════════
 //  STATUS UPDATE
 // ═══════════════════════════════════════════════════
-// دکمه‌های پنل پایین — روی نقطه انتخاب‌شده عمل می‌کنن (نه لزوماً هدف فعلی ناوبری)
 $('panel-done-btn').addEventListener('click',   () => updateStatus('done'));
 $('panel-review-btn').addEventListener('click', () => updateStatus('review'));
 
-$('hud-voice-btn').addEventListener('click',  () => {
-  if (state.currentNavIdx !== null) {
-    const loc = state.locations[state.currentNavIdx];
-    const d = state.userLat !== null
-      ? formatDist(haversine(state.userLat, state.userLon, loc.lat, loc.lon))
-      : 'فاصله نامشخص';
-    speak(`هدف: ${loc.name}، فاصله: ${d}`);
-  }
-});
-
 function updateStatus(newStatus) {
-  // کار می‌کنه روی selectedIdx (نقطه‌ای که کاربر باز کرده)
   const idx = state.selectedIdx;
   if (idx === null) return;
   const loc = state.locations[idx];
@@ -938,7 +810,6 @@ function updateStatus(newStatus) {
   }
 }
 
-// وضعیت دکمه‌های پنل رو بر اساس نقطه انتخاب‌شده آپدیت کن
 function refreshPanelButtons() {
   const idx = state.selectedIdx;
   const doneBtn   = $('panel-done-btn');
@@ -967,18 +838,9 @@ async function drawRoute(destIdx) {
     if (json.code !== 'Ok') return;
 
     const coords  = json.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-    const distM   = json.routes[0].distance;
-    const durSec  = json.routes[0].duration;
-
     state.routeLayer = L.polyline(coords, {
       color: '#1565c0', weight: 5, opacity: 0.75, lineJoin: 'round'
     }).addTo(map);
-
-    $('hud-dist').textContent   = formatDist(distM);
-    $('compass-eta').textContent = `⏱ ${formatDuration(durSec)} پیاده`;
-
-    // صدا
-    speak(`به مقصد ${dest.name} حرکت کنید. فاصله ${formatDist(distM)}.`);
 
   } catch (err) {
     // اگه اینترنت نبود fallback به خط مستقیم
@@ -997,29 +859,8 @@ function removeRoute() {
 }
 
 // ═══════════════════════════════════════════════════
-//  COMPASS & DISTANCE
+//  DISTANCE UTILITIES
 // ═══════════════════════════════════════════════════
-function updateCompass(destLat, destLon) {
-  if (destLat === null || destLon === null || state.userLat === null) return;
-  const bearing  = getBearing(state.userLat, state.userLon, destLat, destLon);
-  const dirLabel = bearingToFarsi(bearing);
-  $('compass-bearing').textContent = `${dirLabel} (${Math.round(bearing)}°)`;
-  $('compass-arrow').style.transform = `rotate(${bearing}deg)`;
-}
-
-function getBearing(lat1, lon1, lat2, lon2) {
-  const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
-  const Δλ = (lon2 - lon1) * Math.PI / 180;
-  const y = Math.sin(Δλ) * Math.cos(φ2);
-  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-}
-
-function bearingToFarsi(b) {
-  const dirs = ['شمال','شمال‌شرق','شرق','جنوب‌شرق','جنوب','جنوب‌غرب','غرب','شمال‌غرب'];
-  return dirs[Math.round(b / 45) % 8];
-}
-
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371000, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
   const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -1028,11 +869,6 @@ function haversine(lat1, lon1, lat2, lon2) {
 
 function formatDist(m) {
   return m >= 1000 ? `${(m/1000).toFixed(1)} کیلومتر` : `${Math.round(m)} متر`;
-}
-
-function formatDuration(sec) {
-  const m = Math.round(sec / 60);
-  return m < 60 ? `${m} دقیقه` : `${Math.floor(m/60)} ساعت ${m%60} دقیقه`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1262,7 +1098,7 @@ function generatePDF() {
           <th style="padding:8px;text-align:right;">یادداشت</th>
         </tr></thead>
         <tbody>${rows}</tbody>
-      </table>
+      <table>
     </div>
   `;
   html2pdf().from(el).set({
@@ -1270,52 +1106,6 @@ function generatePDF() {
     filename: `Report_${state.user}_${new Date().toISOString().slice(0,10)}.pdf`,
     jsPDF: { orientation: 'portrait', format: 'a4' }
   }).save().then(() => showToast('✅ PDF ذخیره شد'));
-}
-
-// ═══════════════════════════════════════════════════
-//  VOICE (Web Speech API - فارسی)
-// ═══════════════════════════════════════════════════
-let speechQueue = [];
-let isSpeaking  = false;
-
-function speak(text) {
-  if (!window.speechSynthesis) return;
-  speechQueue.push(text);
-  if (!isSpeaking) processQueue();
-}
-
-function processQueue() {
-  if (!speechQueue.length) { isSpeaking = false; hideVoiceStatus(); return; }
-  isSpeaking = true;
-  const text = speechQueue.shift();
-  showVoiceStatus(text);
-
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang  = 'fa-IR';
-  utt.rate  = 1.0;
-  utt.pitch = 1.0;
-
-  // انتخاب صدای فارسی در صورت وجود
-  const voices = window.speechSynthesis.getVoices();
-  const faVoice = voices.find(v => v.lang.startsWith('fa'));
-  if (faVoice) utt.voice = faVoice;
-
-  utt.onend = () => { setTimeout(processQueue, 200); };
-  utt.onerror = () => { isSpeaking = false; hideVoiceStatus(); processQueue(); };
-  window.speechSynthesis.speak(utt);
-}
-
-function showVoiceStatus(text) {
-  $('voice-text').textContent = text.substring(0, 40) + (text.length > 40 ? '...' : '');
-  $('voice-status').classList.add('show');
-}
-function hideVoiceStatus() {
-  $('voice-status').classList.remove('show');
-}
-
-// بارگذاری صداها
-if (window.speechSynthesis) {
-  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 }
 
 // ═══════════════════════════════════════════════════
