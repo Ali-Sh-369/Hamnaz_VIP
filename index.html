@@ -496,7 +496,26 @@ function pickNextTarget() { const pending = state.locations.map((loc,idx)=>({loc
 function haversine(lat1,lon1,lat2,lon2){ const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180,a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
 
 let pendingChecklistCallback = null;
-function showChecklistModal(callback) { const modal = $('checklist-modal'); const container = $('checklist-options'); container.innerHTML = CHECKLIST_ITEMS.map((item,idx)=>`<div class="check-group"><label><input type="checkbox" value="${item.replace(/"/g,'&quot;')}" id="chk_${idx}"> <span>${item}</span></label></div>`).join(''); modal.classList.add('show'); pendingChecklistCallback = callback; }
+function showChecklistModal(callback) { const modal = $('checklist-modal'); const container = $('checklist-options'); container.innerHTML = CHECKLIST_ITEMS.map((item,idx)=>`<div class="check-group"><label><input type="checkbox" value="${item.replace(/"/g,'&quot;')}" id="chk_${idx}" class="check-limit"> <span>${item}</span></label></div>`).join(''); 
+    modal.classList.add('show'); 
+    pendingChecklistCallback = callback;
+    
+    const checkboxes = container.querySelectorAll('.check-limit');
+    function updateDisabledState() {
+        const checkedCount = document.querySelectorAll('.check-limit:checked').length;
+        const reachedLimit = checkedCount >= 2;
+        checkboxes.forEach(cb => {
+            if (!cb.checked) {
+                cb.disabled = reachedLimit;
+            }
+        });
+    }
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateDisabledState);
+    });
+    updateDisabledState();
+}
 $('modal-submit').onclick = () => { const modal = $('checklist-modal'); const selected = Array.from(modal.querySelectorAll('.check-group input:checked')).map(cb => cb.value); if(pendingChecklistCallback) pendingChecklistCallback(selected); modal.classList.remove('show'); pendingChecklistCallback=null; };
 $('modal-cancel').onclick = () => { $('checklist-modal').classList.remove('show'); pendingChecklistCallback=null; };
 
