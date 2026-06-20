@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1565C0">
+  <title>Hamnaz</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ───── Design Tokens ───── */
+    :root {
+      --bg:         #f0f4f9;
+      --surface:    #ffffff;
+      --surface2:   #e8edf4;
+      --text:       #1a2233;
+      --text-muted: #6b7a99;
+      --primary:    #1565c0;
+      --primary-dk: #0d47a1;
+      --success:    #2e7d32;
+      --warning:    #e65100;
+      --danger:     #c62828;
+      --border:     #d0d9e8;
+      --nav-h:      52px;
+      --tab-h:      50px;
+      --panel-h:    38vh;
+      --radius:     12px;
+      --shadow:     0 2px 12px rgba(0,0,0,.10);
+    }
+    [data-theme="dark"] {
+      --bg:         #0f1420;
+      --surface:    #1a2233;
+      --surface2:   #232d42;
+      --text:       #e4eaf5;
+      --text-muted: #8896b3;
+      --border:     #2d3a55;
+    }
+
+    /* ───── Reset ───── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background .3s, color .3s;
+    }
+
+    /* ───── Header ───── */
+    header {
+      height: var(--nav-h);
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      flex-shrink: 0;
+      z-index: 500;
+    }
+    .header-title { font-weight: 700; font-size: .95rem; display:flex; align-items:center; gap:7px; }
+    .header-actions { display:flex; gap:10px; align-items:center; }
+    .btn-icon { background:none; border:none; color:#fff; font-size:1.15rem; cursor:pointer; padding:5px; border-radius:6px; }
+    .btn-icon:hover { background:rgba(255,255,255,.15); }
+
+    /* ───── Tab Bar ───── */
+    .tab-bar {
+      height: var(--tab-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-shrink: 0;
+      z-index: 400;
+      order: 3;
+    }
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border-bottom: 3px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn i { font-size: 1.05rem; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* ───── Screens ───── */
+    .screen { flex:1; display:none; flex-direction:column; overflow:hidden; }
+    .screen.active { display:flex; }
+
+    /* ───── Login ───── */
+    #screen-login {
+      justify-content: center;
+      align-items: center;
+      background: var(--bg);
+    }
+    .login-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      width: 88%;
+      max-width: 340px;
+      box-shadow: var(--shadow);
+    }
+    .login-card h3 { color: var(--primary); text-align:center; margin-bottom:22px; font-size:1.1rem; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:.82rem; margin-bottom:5px; color:var(--text-muted); }
+    .form-group input {
+      width:100%; padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:var(--bg);
+      color:var(--text);
+      font-family:inherit;
+      font-size:.9rem;
+      outline:none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+    .btn-block {
+      width:100%; padding:12px;
+      background:var(--primary);
+      color:#fff;
+      border:none; border-radius:8px;
+      font-weight:700; font-size:.95rem;
+      cursor:pointer; font-family:inherit;
+      transition: background .2s;
+    }
+    .btn-block:hover { background: var(--primary-dk); }
+
+    /* ───── Map Screen ───── */
+    #screen-map { position: relative; }
+    #map { flex: 1; min-height: 0; z-index: 1; }
+
+    /* ───── Bottom Panel (Map) ───── */
+    #map-panel {
+      max-height: var(--panel-h);
+      overflow-y: auto;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 10px;
+      flex-shrink: 0;
+      z-index: 200;
+    }
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .upload-zone label { cursor:pointer; display:block; }
+    .upload-zone i { font-size: 2rem; display:block; margin-bottom:8px; color:var(--primary); }
+    .upload-zone input { display:none; }
+    .upload-hint { font-size:.7rem; margin-top:6px; color:var(--text-muted); }
+
+    .detail-card {
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      margin-top: 8px;
+    }
+    .detail-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .detail-name { font-weight:700; font-size:.9rem; }
+    .status-badge {
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: .68rem;
+      font-weight: 700;
+    }
+    .s-pending { background:#fff8e1; color:#f57f17; }
+    .s-done    { background:#e8f5e9; color:#2e7d32; }
+    .s-review  { background:#fff3e0; color:#e65100; }
+    .s-final   { background:#ffebee; color:#c62828; }
+    [data-theme="dark"] .s-pending { background:#3e2c00; color:#ffcc02; }
+    [data-theme="dark"] .s-done    { background:#0d3318; color:#69f0ae; }
+    [data-theme="dark"] .s-review  { background:#3e1500; color:#ffab40; }
+    [data-theme="dark"] .s-final   { background:#4a1015; color:#ff8a80; }
+
+    .detail-desc { font-size:.75rem; color:var(--text-muted); margin-bottom:8px; }
+    .img-row { display:flex; gap:6px; margin-bottom:8px; overflow-x:auto; }
+    .thumb {
+      width:58px; height:58px; border-radius:8px;
+      object-fit:cover; border:1px solid var(--border);
+      cursor:pointer; flex-shrink:0; background:var(--surface);
+    }
+    .note-area {
+      width:100%; padding:7px 10px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:var(--bg);
+      color:var(--text);
+      font-family:inherit;
+      font-size:.78rem;
+      resize:none;
+      height:46px;
+    }
+    .note-area:focus { outline:none; border-color:var(--primary); }
+
+    /* Action Buttons Row */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-action {
+      flex: 1;
+      padding: 9px 6px;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-action.done     { background: var(--success); color: #fff; }
+    .btn-action.review   { background: var(--warning); color: #fff; }
+    .btn-action.final    { background: var(--danger); color: #fff; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Checkbox Modal for Questionnaire */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.25s;
+    }
+    .modal.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-card {
+      background: var(--surface);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 420px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+      direction: rtl;
+    }
+    .modal-card h4 {
+      color: var(--primary);
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      border-right: 4px solid var(--primary);
+      padding-right: 12px;
+    }
+    .check-group {
+      margin: 12px 0;
+    }
+    .check-group label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .check-group input {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .modal-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 28px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal-submit {
+      background: var(--success);
+      color: white;
+    }
+    .modal-cancel {
+      background: var(--text-muted);
+      color: white;
+    }
+
+    .reset-btn {
+      width:100%; margin-top:8px;
+      padding:8px; border:1.5px solid var(--border);
+      border-radius:8px; background:none;
+      color:var(--text-muted); font-family:inherit;
+      font-size:.78rem; cursor:pointer;
+    }
+    .reset-btn:hover { border-color:var(--danger); color:var(--danger); }
+
+    .end-mission-btn {
+      width:100%; margin-top:8px;
+      padding:10px; border:none;
+      border-radius:8px; background:var(--success);
+      color:#fff; font-family:inherit;
+      font-weight:700; font-size:.82rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:7px;
+    }
+    .end-mission-btn:hover { background:#256428; }
+
+    /* Timer Bar */
+    .timer-bar {
+      display:flex; justify-content:space-between; align-items:center;
+      background:var(--surface2); border-radius:8px;
+      padding:7px 12px; margin-bottom:8px;
+    }
+    .timer-label { font-size:.7rem; color:var(--text-muted); }
+    .timer-digits { font-family:monospace; font-size:1rem; font-weight:700; letter-spacing:.05em; }
+    .timer-btns { display:flex; gap:6px; }
+    .btn-sm {
+      padding:4px 10px; border:none; border-radius:6px;
+      font-family:inherit; font-size:.72rem; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; gap:4px;
+    }
+    .btn-sm.pause  { background:var(--warning); color:#fff; }
+    .btn-sm.pdf    { background:var(--primary); color:#fff; }
+
+    /* Report Screen */
+    #screen-report { overflow-y: auto; padding: 14px; gap: 12px; padding-bottom: 70px; }
+    .report-header { background:var(--primary); color:#fff; border-radius:var(--radius); padding:14px 16px; }
+    .report-header h3 { font-size:1rem; margin-bottom:4px; }
+    .report-header p  { font-size:.78rem; opacity:.85; }
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .stat-card { background:var(--surface); border-radius:var(--radius); padding:12px 10px; text-align:center; box-shadow:var(--shadow); }
+    .stat-num { font-size:1.6rem; font-weight:700; }
+    .stat-num.done   { color:var(--success); }
+    .stat-num.review { color:var(--warning); }
+    .stat-num.final  { color:var(--danger); }
+    .stat-num.pending{ color:var(--text-muted); }
+    .stat-label { font-size:.68rem; color:var(--text-muted); margin-top:2px; }
+    .progress-bar-wrap { background:var(--surface); border-radius:var(--radius); padding:12px 14px; box-shadow:var(--shadow); }
+    .progress-bar-wrap label { font-size:.78rem; font-weight:700; display:flex; justify-content:space-between; margin-bottom:6px; }
+    .prog-track { background:var(--surface2); border-radius:20px; height:10px; overflow:hidden; }
+    .prog-fill  { height:100%; background:var(--success); border-radius:20px; transition:width .5s; }
+    .report-list { display:flex; flex-direction:column; gap:7px; }
+    .report-item {
+      background:var(--surface);
+      border-radius:10px;
+      padding:10px 13px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      box-shadow:0 1px 4px rgba(0,0,0,.07);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .report-item:hover { transform: translateX(-4px); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .report-num {
+      width:32px; height:32px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.75rem; font-weight:700; flex-shrink:0;
+    }
+    .report-num.done { background:var(--success); color:#fff; }
+    .report-num.review { background:var(--warning); color:#fff; }
+    .report-num.final { background:var(--danger); color:#fff; }
+    .report-num.pending { background:var(--text-muted); color:#fff; }
+    .report-num.active { background:var(--primary); color:#fff; box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--primary); }
+    .report-item-info { flex:1; min-width:0; }
+    .report-item-name { font-weight:700; font-size:.83rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .report-item-checklist { font-size:.68rem; color:var(--text-muted); margin-top:3px; display:flex; flex-wrap:wrap; gap:5px; }
+    .checklist-badge { background:var(--surface2); border-radius:12px; padding:2px 8px; font-size:.65rem; }
+    .report-item-note { font-size:.72rem; color:var(--text-muted); margin-top:2px; }
+
+    .user-dot { width:16px; height:16px; background:#e53935; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 3px rgba(229,57,53,.35); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{ box-shadow:0 0 0 3px rgba(229,57,53,.35); } 50%{ box-shadow:0 0 0 7px rgba(229,57,53,.1); } }
+    .custom-div-icon { background:transparent; border:none; }
+    .mc { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; border:2.5px solid rgba(255,255,255,.9); box-shadow:0 2px 6px rgba(0,0,0,.3); }
+    .mc.blue   { background:var(--primary); }
+    .mc.orange { background:#f57c00; }
+    .mc.green  { background:#2e7d32; }
+    .mc.red    { background:#c62828; }
+    .mc.grey   { background:#757575; }
+
+    .leaflet-routing-container { display:none !important; }
+    #toast { position:fixed; bottom:70px; left:50%; transform:translateX(-50%); background:rgba(20,30,50,.9); color:#fff; padding:8px 18px; border-radius:24px; z-index:3000; font-size:.78rem; opacity:0; pointer-events:none; transition:opacity .25s; max-width:85vw; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    #toast.show { opacity:1; }
+    .hidden { display:none !important; }
+    .section-title { font-size:.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+  </style>
+</head>
+<body>
+<div id="toast"></div>
+<header>
+  <div class="header-title"><i class="fas fa-map-marked-alt"></i>Hamnaz</div>
+  <div class="header-actions"><button class="btn-icon" id="theme-toggle"><i class="fas fa-moon"></i></button><button class="btn-icon hidden" id="logout-btn"><i class="fas fa-sign-out-alt"></i></button></div>
+</header>
+
+<div class="screen active" id="screen-login">
+  <div class="login-card"><h3>🔐 ورود</h3>
+    <div class="form-group"><label>نام کاربری</label><input type="text" id="login-user" placeholder="نام کاربری"></div>
+    <div class="form-group"><label>رمز عبور</label><input type="password" id="login-pass" placeholder="••••••"></div>
+    <button class="btn-block" id="do-login">ورود</button>
+  </div>
+</div>
+
+<div class="screen" id="screen-map" style="position:relative;">
+  <div id="map"></div>
+  <div id="map-panel">
+    <div id="upload-section"><div class="upload-zone"><label for="excel-file"><i class="fas fa-file-excel"></i> آپلود فایل اکسل یا CSV<input type="file" id="excel-file" accept=".csv,.xlsx,.xls"></label><div class="upload-hint">ستون: name, lon, lat, توضیحات, img1, img2, img3</div></div></div>
+    <div id="inspection-section" class="hidden">
+      <div class="timer-bar"><div><div class="timer-label">⏱ زمان کل</div><div class="timer-digits" id="total-timer">00:00:00</div></div><div class="timer-btns"><button class="btn-sm pause" id="pause-resume-btn"><i class="fas fa-pause"></i> <span>توقف</span></button><button class="btn-sm pdf" id="finish-inspection-btn"><i class="fas fa-file-pdf"></i> PDF</button></div></div>
+      <div class="detail-card" id="detail-card"><div class="detail-header"><div class="detail-name" id="loc-name">انتخاب نقطه...</div><span class="status-badge s-pending" id="loc-status">در انتظار</span></div><div class="detail-desc" id="loc-desc"></div><div class="img-row" id="loc-images"></div>
+        <div id="inspector-inputs" class="hidden">
+          <div class="action-row">
+            <button class="btn-action done" id="panel-done-btn"><i class="fas fa-clipboard-list"></i> رسیدم</button>
+            <button class="btn-action review" id="panel-review-btn"><i class="fas fa-exclamation-triangle"></i> بررسی</button>
+            <button class="btn-action final" id="panel-final-btn"><i class="fas fa-ban"></i> پایان کار</button>
+          </div>
+          <textarea class="note-area" id="loc-note" placeholder="📝 یادداشت..."></textarea>
+        </div>
+      </div>
+      <button class="end-mission-btn" id="end-mission-btn"><i class="fas fa-flag-checkered"></i> پایان ماموریت امروز</button>
+      <button class="reset-btn" id="reset-track-btn"><i class="fas fa-trash-alt"></i> حذف و آپلود جدید</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-report">
+  <div class="report-header"><h3 id="rpt-title">گزارش بازرسی</h3><p id="rpt-subtitle">هنوز داده‌ای بارگذاری نشده</p></div>
+  <div class="stats-row" id="rpt-stats"><div class="stat-card"><div class="stat-num done" id="s-done">۰</div><div class="stat-label">رسیدم</div></div><div class="stat-card"><div class="stat-num review" id="s-review">۰</div><div class="stat-label">نیاز به بررسی</div></div><div class="stat-card"><div class="stat-num final" id="s-final">۰</div><div class="stat-label">پایان کار</div></div><div class="stat-card"><div class="stat-num pending" id="s-pending">۰</div><div class="stat-label">باقی‌مانده</div></div></div>
+  <div class="progress-bar-wrap"><label>پیشرفت کلی <span id="rpt-pct">۰٪</span></label><div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div>
+  <div class="section-title">جزئیات نقاط (کلیک کنید)</div>
+  <div class="report-list" id="rpt-list"></div>
+</div>
+
+<nav class="tab-bar hidden" id="tab-bar"><button class="tab-btn active" data-tab="screen-map"><i class="fas fa-map"></i> نقشه</button><button class="tab-btn" data-tab="screen-report"><i class="fas fa-chart-bar"></i> گزارش</button></nav>
+
+<!-- Modal for checklist -->
+<div id="checklist-modal" class="modal"><div class="modal-card"><h4><i class="fas fa-check-square"></i> پرسشنامه تستی</h4><div id="checklist-options" class="check-group"></div><div class="modal-actions"><button class="modal-submit" id="modal-submit">✔ ثبت و انجام شد</button><button class="modal-cancel" id="modal-cancel">✖ انصراف</button></div></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+'use strict';
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+const USERS_DB = { "Mehdi": "2525800", "Ali": "2078" };
+const YAZD_CENTER = [31.8974, 54.3569];
+const OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving';
+
+// predefined checklist (10 items)
+const CHECKLIST_ITEMS = [
+  "تخریب/گودبرداری", "سازه", "دیوارچینی", "تاسیسات و آسانسور", "ابتدای نازک کاری",  "نما", "نازک کاری", "ظریف کاری", "بازسازی",
+];
+
+const state = { user: null, locations: [], selectedIdx: null, currentNavIdx: null, userLat: null, userLon: null, totalSeconds: 0, isPaused: false, timerInterval: null, routeLayer: null, routeRequestId: 0, lastRouteFetchTime: 0, lastRouteFetchPos: null };
+let map, markersGroup, userMarker;
+const $ = id => document.getElementById(id);
+const loginScreen = $('screen-login'), mapScreen = $('screen-map'), reportScreen = $('screen-report'), tabBar = $('tab-bar'), logoutBtn = $('logout-btn'), themeToggle = $('theme-toggle');
+
+themeToggle.addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  themeToggle.innerHTML = dark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+  if (map && window._tileLayer) { map.removeLayer(window._tileLayer); window._tileLayer = L.tileLayer(dark ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(map); }
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => { const target = btn.dataset.tab; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; }); const scr = $(target); scr.style.display = 'flex'; scr.classList.add('active'); if (target === 'screen-report') renderReport(); if (target === 'screen-map' && map) setTimeout(() => map.invalidateSize(), 50); }));
+
+$('do-login').addEventListener('click', () => { const user = $('login-user').value.trim(), pass = $('login-pass').value; if (USERS_DB[user] && USERS_DB[user] === pass) { state.user = user; localStorage.setItem('hn_user', user); startApp(); } else showToast('❌ نام کاربری یا رمز اشتباه است'); });
+window.addEventListener('load', () => { const saved = localStorage.getItem('hn_user'); if (saved && USERS_DB[saved]) { state.user = saved; startApp(); } });
+logoutBtn.addEventListener('click', () => { localStorage.removeItem('hn_user'); location.reload(); });
+
+function startApp() { loginScreen.classList.remove('active'); loginScreen.style.display = 'none'; tabBar.classList.remove('hidden'); mapScreen.style.display = 'flex'; mapScreen.classList.add('active'); logoutBtn.classList.remove('hidden'); initMap(); loadSavedData(); startUserTracking(); }
+function initMap() { if (map) return; map = L.map('map', { zoomControl: true, attributionControl: false }).setView(YAZD_CENTER, 13); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; window._tileLayer = L.tileLayer(isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(map); markersGroup = L.layerGroup().addTo(map); }
+function saveData() { if (!state.user) return; localStorage.setItem(`hn_data_${state.user}`, JSON.stringify({ locations: state.locations, totalSeconds: state.totalSeconds, currentNavIdx: state.currentNavIdx, selectedIdx: state.selectedIdx })); }
+function loadSavedData() { const raw = localStorage.getItem(`hn_data_${state.user}`); if (!raw) return; const d = JSON.parse(raw); state.locations = d.locations || []; state.totalSeconds = d.totalSeconds || 0; state.currentNavIdx = d.currentNavIdx ?? null; state.selectedIdx = d.selectedIdx ?? null; if (state.locations.length > 0) { showInspectionUI(); startTimer(); renderAll(); if (state.currentNavIdx !== null) { drawRoute(state.currentNavIdx); if (state.selectedIdx !== state.currentNavIdx) state.selectedIdx = state.currentNavIdx; renderDetailPanel(); } } }
+
+$('excel-file').addEventListener('change', e => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = ev => { const data = new Uint8Array(ev.target.result); const wb = XLSX.read(data, { type: 'array' }); const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }); processExcelData(json); }; reader.readAsArrayBuffer(file); });
+function processExcelData(rows) { const startIdx = (rows[0] && isNaN(Number(rows[0][1]))) ? 1 : 0; const locs = []; for (let i = startIdx; i < rows.length; i++) { const r = rows[i]; if (!r[0] || r[1] == null || r[2] == null) continue; locs.push({ id: 'loc_'+i, name: r[0].toString(), lon: parseFloat(r[1]), lat: parseFloat(r[2]), desc: r[3] || '', img1: r[4] || '', img2: r[5] || '', img3: r[6] || '', status: 'pending', note: '', checklist: [], bookmarkNum: (()=>{ let m=r[0].toString().match(/\d+/g); return m ? Math.min(Math.max(parseInt(m[0],10),0),999) : null; })() }); } if (locs.length===0) { showToast('❌ فرمت نامعتبر'); return; } state.locations = locs; state.selectedIdx = null; state.currentNavIdx = null; pickNextTarget(); showInspectionUI(); startTimer(); saveData(); renderAll(); showToast(`✅ ${locs.length} نقطه بارگذاری شد`); }
+function pickNextTarget() { const pending = state.locations.map((loc,idx)=>({loc,idx})).filter(({loc})=>loc.status==='pending'); if(pending.length===0){ state.currentNavIdx=null; showToast('🎉 همگی ثبت شدند'); return; } if(state.userLat!==null) pending.sort((a,b)=>haversine(state.userLat,state.userLon,a.loc.lat,a.loc.lon)-haversine(state.userLat,state.userLon,b.loc.lat,b.loc.lon)); const next=pending[0]; state.currentNavIdx=next.idx; state.selectedIdx=next.idx; drawRoute(next.idx); renderAll(); }
+function haversine(lat1,lon1,lat2,lon2){ const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180,a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
+
+let pendingChecklistCallback = null;
+function showChecklistModal(callback) { const modal = $('checklist-modal'); const container = $('checklist-options'); container.innerHTML = CHECKLIST_ITEMS.map((item,idx)=>`<div class="check-group"><label><input type="checkbox" value="${item.replace(/"/g,'&quot;')}" id="chk_${idx}" class="check-limit"> <span>${item}</span></label></div>`).join(''); 
+    modal.classList.add('show'); 
+    pendingChecklistCallback = callback;
+    
+    const checkboxes = container.querySelectorAll('.check-limit');
+    // رفع باگ: بعضی مرورگرها (مثل Chrome) موقع بازسازی innerHTML با id/value یکسان،
+    // وضعیت checked قبلی رو نگه می‌دارن. برای همین صریحاً همه رو ریست می‌کنیم تا
+    // برای هر مکان جدید، پرسشنامه از صفر و خالی شروع بشه.
+    checkboxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
+
+    function updateDisabledState() {
+        const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+        const reachedLimit = checkedCount >= 2;
+        checkboxes.forEach(cb => {
+            if (!cb.checked) {
+                cb.disabled = reachedLimit;
+            }
+        });
+    }
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateDisabledState);
+    });
+    updateDisabledState();
+}
+$('modal-submit').onclick = () => { const modal = $('checklist-modal'); const selected = Array.from(modal.querySelectorAll('.check-group input:checked')).map(cb => cb.value); if(pendingChecklistCallback) pendingChecklistCallback(selected); modal.classList.remove('show'); pendingChecklistCallback=null; };
+$('modal-cancel').onclick = () => { $('checklist-modal').classList.remove('show'); pendingChecklistCallback=null; };
+
+function updateStatusWithChecklist(newStatus) { const idx = state.selectedIdx; if(idx===null) return; const loc = state.locations[idx]; if(loc.status !== 'pending'){ showToast('نقطه قبلاً ثبت شده'); return; } if(newStatus === 'done'){ showChecklistModal((selected) => { loc.checklist = selected; loc.status = 'done'; loc.note = $('loc-note').value; saveData(); renderAll(); showToast('✅ رسیدم + پرسشنامه ثبت شد'); setTimeout(()=>{ removeRoute(); pickNextTarget(); saveData(); renderAll(); if($('screen-report').classList.contains('active')) renderReport(); },300); }); } else { loc.status = newStatus; loc.note = $('loc-note').value; saveData(); renderAll(); showToast(newStatus==='review'?'⚠️ بررسی':'🔴 پایان کار'); setTimeout(()=>{ removeRoute(); pickNextTarget(); saveData(); renderAll(); if($('screen-report').classList.contains('active')) renderReport(); },300); } }
+$('panel-done-btn').addEventListener('click',()=>updateStatusWithChecklist('done'));
+$('panel-review-btn').addEventListener('click',()=>updateStatusWithChecklist('review'));
+$('panel-final-btn').addEventListener('click',()=>updateStatusWithChecklist('final'));
+
+function refreshPanelButtons(){ const idx=state.selectedIdx; const doneBtn=$('panel-done-btn'),reviewBtn=$('panel-review-btn'),finalBtn=$('panel-final-btn'); if(idx===null||!state.locations[idx])return; const isPending=state.locations[idx].status==='pending'; doneBtn.disabled=reviewBtn.disabled=finalBtn.disabled=!isPending; doneBtn.style.opacity=reviewBtn.style.opacity=finalBtn.style.opacity=isPending?'1':'0.45'; }
+async function drawRoute(destIdx){
+  if(state.userLat===null) return;
+  const dest = state.locations[destIdx];
+  if(!dest) return;
+  // هر فراخوانی یه شناسه می‌گیره؛ فقط آخرین فراخوانی اجازه داره خط رو نهایی کنه.
+  // این جلوی باگ «خط مسیر آپدیت نمیشه / خط‌های تکراری می‌مونه» رو می‌گیره که به خاطر
+  // رسیدن دیرهنگام یک درخواست OSRM قدیمی‌تر بعد از یک درخواست جدیدتر پیش می‌اومد.
+  const myRequestId = ++state.routeRequestId;
+  let newLayer;
+  try{
+    const url=`${OSRM_BASE}/${state.userLon},${state.userLat};${dest.lon},${dest.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if(json.code!=='Ok') throw new Error();
+    const coords = json.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+    newLayer = L.polyline(coords,{color:'#1565c0',weight:5,opacity:0.75,lineJoin:'round'});
+  } catch(e){
+    newLayer = L.polyline([[state.userLat,state.userLon],[dest.lat,dest.lon]],{color:'#1565c0',weight:4,opacity:0.6,dashArray:'8,8'});
+  }
+  if(myRequestId !== state.routeRequestId){
+    // یه درخواست جدیدتر در همین فاصله شروع شده؛ این نتیجه‌ی قدیمی رو دور می‌ریزیم
+    return;
+  }
+  removeRoute();
+  newLayer.addTo(map);
+  state.routeLayer = newLayer;
+}
+function removeRoute(){ if(state.routeLayer){ state.routeLayer.remove(); state.routeLayer=null; } }
+function startUserTracking(){ if(!navigator.geolocation)return; navigator.geolocation.watchPosition(pos=>{ const {latitude:lat,longitude:lon}=pos.coords; const isFirst=state.userLat===null; state.userLat=lat; state.userLon=lon; const userIcon=L.divIcon({html:'<div class="user-dot"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]}); if(userMarker) userMarker.setLatLng([lat,lon]); else userMarker=L.marker([lat,lon],{icon:userIcon,zIndexOffset:1000}).addTo(map).bindPopup('📍 موقعیت شما'); if(isFirst && state.locations.length>0){ pickNextTarget(); map.setView([lat,lon],15); } onUserPositionUpdate(); }, err=>console.warn(err),{enableHighAccuracy:true,maximumAge:3000,timeout:10000}); }
+function onUserPositionUpdate(){
+  if(state.currentNavIdx===null) return;
+  // به‌جای فراخوانی OSRM در هر تیک GPS (که هم باعث رسم همزمان/رقابتی می‌شد و هم فشار زیاد
+  // روی سرور رایگان OSRM می‌ذاشت)، فقط وقتی موقعیت به‌اندازه‌ی محسوس تغییر کرده یا
+  // مدت معینی گذشته، دوباره مسیر رو می‌کشیم.
+  const now = Date.now();
+  const last = state.lastRouteFetchPos;
+  const movedEnough = !last || haversine(last.lat, last.lon, state.userLat, state.userLon) > 20;
+  const timeElapsed = (now - state.lastRouteFetchTime) > 8000;
+  if(movedEnough || timeElapsed){
+    state.lastRouteFetchTime = now;
+    state.lastRouteFetchPos = { lat: state.userLat, lon: state.userLon };
+    drawRoute(state.currentNavIdx);
+  }
+}
+function renderAll(){ renderMarkers(); renderDetailPanel(); }
+function renderMarkers(){ if(!markersGroup)return; markersGroup.clearLayers(); state.locations.forEach((loc,idx)=>{ const num=loc.bookmarkNum!==null?loc.bookmarkNum:(idx+1); let colorClass='blue'; if(loc.status==='done') colorClass='green'; else if(loc.status==='review') colorClass='grey'; else if(loc.status==='final') colorClass='red'; else if(idx===state.currentNavIdx && loc.status==='pending') colorClass='orange'; const icon=L.divIcon({html:`<div class="mc ${colorClass}">${num}</div>`,className:'custom-div-icon',iconSize:[32,32],iconAnchor:[16,16]}); const m=L.marker([loc.lat,loc.lon],{icon}).addTo(markersGroup); m.on('click',()=>{ state.selectedIdx=idx; renderDetailPanel(); if(idx!==state.currentNavIdx && loc.status==='pending'){ state.currentNavIdx=idx; drawRoute(idx); showToast(`هدف: ${loc.name}`); } renderMarkers(); }); }); }
+function renderDetailPanel(){ const idx=state.selectedIdx; if(idx===null||!state.locations[idx]) return; const loc=state.locations[idx]; const num=loc.bookmarkNum!==null?loc.bookmarkNum:(idx+1); $('loc-name').innerHTML=`<i class="fas fa-map-pin"></i> ${loc.name}`; $('loc-desc').textContent=loc.desc||'بدون توضیحات'; const badge=$('loc-status'); if(loc.status==='done'){ badge.textContent='📋 رسیدم + پرسشنامه'; badge.className='status-badge s-done'; }else if(loc.status==='review'){ badge.textContent='⚠️ نیاز به بررسی'; badge.className='status-badge s-review'; }else if(loc.status==='final'){ badge.textContent='🔴 پایان کار'; badge.className='status-badge s-final'; }else{ badge.textContent='⏳ در انتظار'; badge.className='status-badge s-pending'; } const gallery=$('loc-images'); gallery.innerHTML=''; [loc.img1,loc.img2,loc.img3].filter(u=>u&&u.trim()).forEach(url=>{ const img=document.createElement('img'); img.src=url; img.className='thumb'; img.loading='lazy'; img.onerror=()=>{ img.src = 'https://via.placeholder.com/58?text=No+Image'; }; img.onclick=()=>window.open(url,'_blank'); gallery.appendChild(img); }); $('inspector-inputs').classList.remove('hidden'); const noteArea=$('loc-note'); noteArea.value=loc.note||''; noteArea.oninput=e=>{ loc.note=e.target.value; saveData(); }; refreshPanelButtons(); }
+function renderReport(){ const locs=state.locations; const done=locs.filter(l=>l.status==='done').length; const review=locs.filter(l=>l.status==='review').length; const final=locs.filter(l=>l.status==='final').length; const pending=locs.filter(l=>l.status==='pending').length; const total=locs.length; const pct=total?Math.round((done+review+final)/total*100):0; $('rpt-title').textContent=`گزارش — ${state.user||''}`; $('rpt-subtitle').textContent=`زمان: ${$('total-timer').textContent} | کل: ${total}`; $('s-done').textContent=done; $('s-review').textContent=review; $('s-final').textContent=final; $('s-pending').textContent=pending; $('rpt-pct').textContent=`${pct}%`; $('prog-fill').style.width=`${pct}%`; const list=$('rpt-list'); list.innerHTML=''; locs.forEach((loc,idx)=>{ const num=loc.bookmarkNum!==null?loc.bookmarkNum:(idx+1); let statusText='',statusClass='',numClass='pending'; if(loc.status==='done'){ statusText='✅ رسیدم'; statusClass='r-done'; numClass='done'; }else if(loc.status==='review'){ statusText='⚠️ بررسی'; statusClass='r-review'; numClass='review'; }else if(loc.status==='final'){ statusText='🔴 پایان کار'; statusClass='r-final'; numClass='final'; }else{ statusText='⏳ در انتظار'; statusClass='r-pending'; numClass='pending'; } if(idx===state.currentNavIdx && loc.status==='pending') numClass='active'; const el=document.createElement('div'); el.className='report-item'; let checklistHtml=''; if(loc.status==='done' && loc.checklist && loc.checklist.length){ checklistHtml=`<div class="report-item-checklist">${loc.checklist.map(c=>`<span class="checklist-badge">${c}</span>`).join('')}</div>`; } el.innerHTML=`<div class="report-num ${numClass}">${num}</div><div class="report-item-info"><div class="report-item-name">${loc.name}</div>${checklistHtml}${loc.note?`<div class="report-item-note">📝 ${loc.note}</div>`:''}</div><div class="report-item-status ${statusClass}">${statusText}</div>`; el.addEventListener('click',()=>{ document.querySelector('.tab-btn[data-tab="screen-map"]').click(); setTimeout(()=>{ state.selectedIdx=idx; if(loc.status==='pending'){ state.currentNavIdx=idx; drawRoute(idx); } renderAll(); map.setView([loc.lat,loc.lon],15); },100); }); list.appendChild(el); }); }
+function startTimer(){ if(state.timerInterval)return; state.timerInterval=setInterval(()=>{ if(state.isPaused)return; state.totalSeconds++; const h=String(Math.floor(state.totalSeconds/3600)).padStart(2,'0'); const m=String(Math.floor((state.totalSeconds%3600)/60)).padStart(2,'0'); const s=String(state.totalSeconds%60).padStart(2,'0'); $('total-timer').textContent=`${h}:${m}:${s}`; if(state.totalSeconds%15===0)saveData(); },1000); }
+$('pause-resume-btn').addEventListener('click',()=>{ state.isPaused=!state.isPaused; if(state.isPaused){ $('pause-resume-btn').innerHTML='<i class="fas fa-play"></i> <span>ادامه</span>'; $('pause-resume-btn').style.background='var(--success)'; }else{ $('pause-resume-btn').innerHTML='<i class="fas fa-pause"></i> <span>توقف</span>'; $('pause-resume-btn').style.background=''; } });
+function showInspectionUI(){ $('upload-section').classList.add('hidden'); $('inspection-section').classList.remove('hidden'); }
+$('reset-track-btn').addEventListener('click',()=>{ if(confirm('تمام داده‌ها حذف شوند؟')){ localStorage.removeItem(`hn_data_${state.user}`); location.reload(); } });
+$('finish-inspection-btn').addEventListener('click',()=>{ saveData(); generatePDF(); });
+$('end-mission-btn').addEventListener('click', () => {
+  const visitedCount = state.locations.filter(l => l.status !== 'pending').length;
+  if(visitedCount === 0){ showToast('هنوز هیچ نقطه‌ای امروز ثبت نشده'); return; }
+  if(!confirm(`${visitedCount} نقطه‌ی بازدیدشده‌ی امروز ابتدا در یک PDF ذخیره و سپس از لیست حذف می‌شن (نقاطِ در انتظار برای فردا باقی می‌مونن). ادامه می‌دی؟`)) return;
+
+  generatePDF().then(() => {
+    // فقط نقاطی که هنوز «در انتظار»ن نگه داشته می‌شن؛ بازدیدشده‌های امروز برای همیشه حذف می‌شن
+    state.locations = state.locations.filter(l => l.status === 'pending');
+    state.totalSeconds = 0;
+    state.isPaused = false;
+    $('total-timer').textContent = '00:00:00';
+    $('pause-resume-btn').innerHTML = '<i class="fas fa-pause"></i> <span>توقف</span>';
+    $('pause-resume-btn').style.background = '';
+    state.selectedIdx = null;
+    state.currentNavIdx = null;
+    state.lastRouteFetchTime = 0;
+    state.lastRouteFetchPos = null;
+    removeRoute();
+    saveData();
+
+    if(state.locations.length > 0){
+      pickNextTarget();
+      showToast('✅ ماموریت امروز پایان یافت — نقاط باقی‌مانده برای فردا آماده‌ست');
+    } else {
+      $('inspection-section').classList.add('hidden');
+      $('upload-section').classList.remove('hidden');
+      renderAll();
+      showToast('🎉 همه‌ی نقاط بازدید شدن! پروژه تموم شد');
+    }
+    if($('screen-report').classList.contains('active')) renderReport();
+  }).catch(() => {
+    showToast('❌ ساخت PDF با خطا مواجه شد، چیزی پاک نشد');
+  });
+});
+function generatePDF(){ showToast('📄 ساخت PDF...'); const locs=state.locations; let rows=locs.map((loc,i)=>{ const num=loc.bookmarkNum!==null?loc.bookmarkNum:(i+1); let stat=''; if(loc.status==='done') stat='رسیدم'; else if(loc.status==='review') stat='نیاز به بررسی'; else if(loc.status==='final') stat='پایان کار'; else stat='بازرسی نشده'; const checklistText=(loc.status==='done' && loc.checklist?.length)?`<br><small>📋 ${loc.checklist.join(', ')}</small>`:''; return `<tr><td style="padding:7px;border-bottom:1px solid #ddd;">${num} - ${loc.name}</td><td style="padding:7px;border-bottom:1px solid #ddd;">${stat}</td><td style="padding:7px;border-bottom:1px solid #ddd;">${loc.note||'—'}${checklistText}</td></tr>`; }).join(''); const el=document.createElement('div'); el.style.cssText='padding:20px;direction:rtl;font-family:Vazirmatn,sans-serif;'; el.innerHTML=`<div style="border:2px solid #1565c0;padding:16px;border-radius:8px;"><h2 style="text-align:center;color:#1565c0;">گزارش بازرسی</h2><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span><b>ناظر:</b> ${state.user}</span><span><b>زمان:</b> ${$('total-timer').textContent}</span><span><b>تاریخ:</b> ${new Date().toLocaleDateString('fa-IR')}</span></div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1565c0;color:#fff;"><th style="padding:8px;">نام</th><th style="padding:8px;">وضعیت</th><th style="padding:8px;">یادداشت/پرسشنامه</th></tr></thead><tbody>${rows}</tbody></table></div>`; return html2pdf().from(el).set({margin:8,filename:`Report_${state.user}_${new Date().toISOString().slice(0,10)}.pdf`,jsPDF:{orientation:'portrait',format:'a4'}}).save().then(()=>showToast('✅ PDF ذخیره شد')); }
+let toastTimer; function showToast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
+</script>
+</body>
+</html>
