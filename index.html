@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-
+ 
   <style>
     /* ───── Design Tokens ───── */
     :root {
@@ -38,7 +38,7 @@
       --text-muted: #8896b3;
       --border:     #2d3a55;
     }
-
+ 
     /* ───── Reset ───── */
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -51,7 +51,7 @@
       overflow: hidden;
       transition: background .3s, color .3s;
     }
-
+ 
     /* ───── Header ───── */
     header {
       height: var(--nav-h);
@@ -68,7 +68,7 @@
     .header-actions { display:flex; gap:10px; align-items:center; }
     .btn-icon { background:none; border:none; color:#fff; font-size:1.15rem; cursor:pointer; padding:5px; border-radius:6px; }
     .btn-icon:hover { background:rgba(255,255,255,.15); }
-
+ 
     /* ───── Tab Bar ───── */
     .tab-bar {
       height: var(--tab-h);
@@ -98,11 +98,11 @@
     }
     .tab-btn i { font-size: 1.05rem; }
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-
+ 
     /* ───── Screens ───── */
     .screen { flex:1; display:none; flex-direction:column; overflow:hidden; }
     .screen.active { display:flex; }
-
+ 
     /* ───── Login ───── */
     #screen-login {
       justify-content: center;
@@ -142,11 +142,11 @@
       transition: background .2s;
     }
     .btn-block:hover { background: var(--primary-dk); }
-
+ 
     /* ───── Map Screen ───── */
     #screen-map { position: relative; }
     #map { flex: 1; min-height: 0; z-index: 1; }
-
+ 
     /* ───── Bottom Panel (Map) ───── */
     #map-panel {
       max-height: var(--panel-h);
@@ -168,7 +168,7 @@
     .upload-zone i { font-size: 2rem; display:block; margin-bottom:8px; color:var(--primary); }
     .upload-zone input { display:none; }
     .upload-hint { font-size:.7rem; margin-top:6px; color:var(--text-muted); }
-
+ 
     .detail-card {
       background: var(--surface2);
       border-radius: var(--radius);
@@ -191,7 +191,7 @@
     [data-theme="dark"] .s-done    { background:#0d3318; color:#69f0ae; }
     [data-theme="dark"] .s-review  { background:#3e1500; color:#ffab40; }
     [data-theme="dark"] .s-final   { background:#4a1015; color:#ff8a80; }
-
+ 
     .detail-desc { font-size:.75rem; color:var(--text-muted); margin-bottom:8px; }
     .img-row { display:flex; gap:6px; margin-bottom:8px; overflow-x:auto; }
     .thumb {
@@ -211,7 +211,7 @@
       height:46px;
     }
     .note-area:focus { outline:none; border-color:var(--primary); }
-
+ 
     /* Action Buttons Row */
     .action-row {
       display: flex;
@@ -237,7 +237,7 @@
     .btn-action.review   { background: var(--warning); color: #fff; }
     .btn-action.final    { background: var(--danger); color: #fff; }
     .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
-
+ 
     /* Checkbox Modal for Questionnaire */
     .modal {
       position: fixed;
@@ -312,7 +312,7 @@
       background: var(--text-muted);
       color: white;
     }
-
+ 
     .reset-btn {
       width:100%; margin-top:8px;
       padding:8px; border:1.5px solid var(--border);
@@ -321,7 +321,7 @@
       font-size:.78rem; cursor:pointer;
     }
     .reset-btn:hover { border-color:var(--danger); color:var(--danger); }
-
+ 
     .end-mission-btn {
       width:100%; margin-top:8px;
       padding:10px; border:none;
@@ -331,7 +331,7 @@
       display:flex; align-items:center; justify-content:center; gap:7px;
     }
     .end-mission-btn:hover { background:#256428; }
-
+ 
     /* Timer Bar */
     .timer-bar {
       display:flex; justify-content:space-between; align-items:center;
@@ -348,7 +348,7 @@
     }
     .btn-sm.pause  { background:var(--warning); color:#fff; }
     .btn-sm.pdf    { background:var(--primary); color:#fff; }
-
+ 
     /* Report Screen */
     #screen-report { overflow-y: auto; padding: 14px; gap: 12px; padding-bottom: 70px; }
     .report-header { background:var(--primary); color:#fff; border-radius:var(--radius); padding:14px 16px; }
@@ -394,7 +394,7 @@
     .report-item-checklist { font-size:.68rem; color:var(--text-muted); margin-top:3px; display:flex; flex-wrap:wrap; gap:5px; }
     .checklist-badge { background:var(--surface2); border-radius:12px; padding:2px 8px; font-size:.65rem; }
     .report-item-note { font-size:.72rem; color:var(--text-muted); margin-top:2px; }
-
+ 
     .user-dot { width:16px; height:16px; background:#e53935; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 3px rgba(229,57,53,.35); animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{ box-shadow:0 0 0 3px rgba(229,57,53,.35); } 50%{ box-shadow:0 0 0 7px rgba(229,57,53,.1); } }
     .custom-div-icon { background:transparent; border:none; }
@@ -404,7 +404,7 @@
     .mc.green  { background:#2e7d32; }
     .mc.red    { background:#c62828; }
     .mc.grey   { background:#757575; }
-
+ 
     .leaflet-routing-container { display:none !important; }
     #toast { position:fixed; bottom:70px; left:50%; transform:translateX(-50%); background:rgba(20,30,50,.9); color:#fff; padding:8px 18px; border-radius:24px; z-index:3000; font-size:.78rem; opacity:0; pointer-events:none; transition:opacity .25s; max-width:85vw; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     #toast.show { opacity:1; }
@@ -418,7 +418,7 @@
   <div class="header-title"><i class="fas fa-map-marked-alt"></i>Hamnaz</div>
   <div class="header-actions"><button class="btn-icon" id="theme-toggle"><i class="fas fa-moon"></i></button><button class="btn-icon hidden" id="logout-btn"><i class="fas fa-sign-out-alt"></i></button></div>
 </header>
-
+ 
 <div class="screen active" id="screen-login">
   <div class="login-card"><h3>🔐 ورود</h3>
     <div class="form-group"><label>نام کاربری</label><input type="text" id="login-user" placeholder="نام کاربری"></div>
@@ -426,7 +426,7 @@
     <button class="btn-block" id="do-login">ورود</button>
   </div>
 </div>
-
+ 
 <div class="screen" id="screen-map" style="position:relative;">
   <div id="map"></div>
   <div id="map-panel">
@@ -448,7 +448,7 @@
     </div>
   </div>
 </div>
-
+ 
 <div class="screen" id="screen-report">
   <div class="report-header"><h3 id="rpt-title">گزارش بازرسی</h3><p id="rpt-subtitle">هنوز داده‌ای بارگذاری نشده</p></div>
   <div class="stats-row" id="rpt-stats"><div class="stat-card"><div class="stat-num done" id="s-done">۰</div><div class="stat-label">رسیدم</div></div><div class="stat-card"><div class="stat-num review" id="s-review">۰</div><div class="stat-label">نیاز به بررسی</div></div><div class="stat-card"><div class="stat-num final" id="s-final">۰</div><div class="stat-label">پایان کار</div></div><div class="stat-card"><div class="stat-num pending" id="s-pending">۰</div><div class="stat-label">باقی‌مانده</div></div></div>
@@ -456,56 +456,56 @@
   <div class="section-title">جزئیات نقاط (کلیک کنید)</div>
   <div class="report-list" id="rpt-list"></div>
 </div>
-
+ 
 <nav class="tab-bar hidden" id="tab-bar"><button class="tab-btn active" data-tab="screen-map"><i class="fas fa-map"></i> نقشه</button><button class="tab-btn" data-tab="screen-report"><i class="fas fa-chart-bar"></i> گزارش</button></nav>
-
+ 
 <!-- Modal for checklist -->
 <div id="checklist-modal" class="modal"><div class="modal-card"><h4><i class="fas fa-check-square"></i> پرسشنامه تستی</h4><div id="checklist-options" class="check-group"></div><div class="modal-actions"><button class="modal-submit" id="modal-submit">✔ ثبت و انجام شد</button><button class="modal-cancel" id="modal-cancel">✖ انصراف</button></div></div></div>
-
+ 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 'use strict';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-
+ 
 const USERS_DB = { "Mehdi": "2525800", "Ali": "2078" };
 const YAZD_CENTER = [31.8974, 54.3569];
 const OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving';
-
+ 
 // predefined checklist (10 items)
 const CHECKLIST_ITEMS = [
   "تخریب/گودبرداری", "سازه", "دیوارچینی", "تاسیسات و آسانسور", "ابتدای نازک کاری",  "نما", "نازک کاری", "ظریف کاری", "بازسازی",
 ];
-
+ 
 const state = { user: null, locations: [], selectedIdx: null, currentNavIdx: null, userLat: null, userLon: null, totalSeconds: 0, isPaused: false, timerInterval: null, routeLayer: null, routeRequestId: 0, lastRouteFetchTime: 0, lastRouteFetchPos: null };
 let map, markersGroup, userMarker;
 const $ = id => document.getElementById(id);
 const loginScreen = $('screen-login'), mapScreen = $('screen-map'), reportScreen = $('screen-report'), tabBar = $('tab-bar'), logoutBtn = $('logout-btn'), themeToggle = $('theme-toggle');
-
+ 
 themeToggle.addEventListener('click', () => {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
   themeToggle.innerHTML = dark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
   if (map && window._tileLayer) { map.removeLayer(window._tileLayer); window._tileLayer = L.tileLayer(dark ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(map); }
 });
-
+ 
 document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => { const target = btn.dataset.tab; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; }); const scr = $(target); scr.style.display = 'flex'; scr.classList.add('active'); if (target === 'screen-report') renderReport(); if (target === 'screen-map' && map) setTimeout(() => map.invalidateSize(), 50); }));
-
+ 
 $('do-login').addEventListener('click', () => { const user = $('login-user').value.trim(), pass = $('login-pass').value; if (USERS_DB[user] && USERS_DB[user] === pass) { state.user = user; localStorage.setItem('hn_user', user); startApp(); } else showToast('❌ نام کاربری یا رمز اشتباه است'); });
 window.addEventListener('load', () => { const saved = localStorage.getItem('hn_user'); if (saved && USERS_DB[saved]) { state.user = saved; startApp(); } });
 logoutBtn.addEventListener('click', () => { localStorage.removeItem('hn_user'); location.reload(); });
-
+ 
 function startApp() { loginScreen.classList.remove('active'); loginScreen.style.display = 'none'; tabBar.classList.remove('hidden'); mapScreen.style.display = 'flex'; mapScreen.classList.add('active'); logoutBtn.classList.remove('hidden'); initMap(); loadSavedData(); startUserTracking(); }
 function initMap() { if (map) return; map = L.map('map', { zoomControl: true, attributionControl: false }).setView(YAZD_CENTER, 13); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; window._tileLayer = L.tileLayer(isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(map); markersGroup = L.layerGroup().addTo(map); }
 function saveData() { if (!state.user) return; localStorage.setItem(`hn_data_${state.user}`, JSON.stringify({ locations: state.locations, totalSeconds: state.totalSeconds, currentNavIdx: state.currentNavIdx, selectedIdx: state.selectedIdx })); }
 function loadSavedData() { const raw = localStorage.getItem(`hn_data_${state.user}`); if (!raw) return; const d = JSON.parse(raw); state.locations = d.locations || []; state.totalSeconds = d.totalSeconds || 0; state.currentNavIdx = d.currentNavIdx ?? null; state.selectedIdx = d.selectedIdx ?? null; if (state.locations.length > 0) { showInspectionUI(); startTimer(); renderAll(); if (state.currentNavIdx !== null) { drawRoute(state.currentNavIdx); if (state.selectedIdx !== state.currentNavIdx) state.selectedIdx = state.currentNavIdx; renderDetailPanel(); } } }
-
+ 
 $('excel-file').addEventListener('change', e => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = ev => { const data = new Uint8Array(ev.target.result); const wb = XLSX.read(data, { type: 'array' }); const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }); processExcelData(json); }; reader.readAsArrayBuffer(file); });
 function processExcelData(rows) { const startIdx = (rows[0] && isNaN(Number(rows[0][1]))) ? 1 : 0; const locs = []; for (let i = startIdx; i < rows.length; i++) { const r = rows[i]; if (!r[0] || r[1] == null || r[2] == null) continue; locs.push({ id: 'loc_'+i, name: r[0].toString(), lon: parseFloat(r[1]), lat: parseFloat(r[2]), desc: r[3] || '', img1: r[4] || '', img2: r[5] || '', img3: r[6] || '', status: 'pending', note: '', checklist: [], bookmarkNum: (()=>{ let m=r[0].toString().match(/\d+/g); return m ? Math.min(Math.max(parseInt(m[0],10),0),999) : null; })() }); } if (locs.length===0) { showToast('❌ فرمت نامعتبر'); return; } state.locations = locs; state.selectedIdx = null; state.currentNavIdx = null; pickNextTarget(); showInspectionUI(); startTimer(); saveData(); renderAll(); showToast(`✅ ${locs.length} نقطه بارگذاری شد`); }
 function pickNextTarget() { const pending = state.locations.map((loc,idx)=>({loc,idx})).filter(({loc})=>loc.status==='pending'); if(pending.length===0){ state.currentNavIdx=null; showToast('🎉 همگی ثبت شدند'); return; } if(state.userLat!==null) pending.sort((a,b)=>haversine(state.userLat,state.userLon,a.loc.lat,a.loc.lon)-haversine(state.userLat,state.userLon,b.loc.lat,b.loc.lon)); const next=pending[0]; state.currentNavIdx=next.idx; state.selectedIdx=next.idx; drawRoute(next.idx); renderAll(); }
 function haversine(lat1,lon1,lat2,lon2){ const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180,a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
-
+ 
 let pendingChecklistCallback = null;
 function showChecklistModal(callback) { const modal = $('checklist-modal'); const container = $('checklist-options'); container.innerHTML = CHECKLIST_ITEMS.map((item,idx)=>`<div class="check-group"><label><input type="checkbox" value="${item.replace(/"/g,'&quot;')}" id="chk_${idx}" class="check-limit"> <span>${item}</span></label></div>`).join(''); 
     modal.classList.add('show'); 
@@ -516,7 +516,7 @@ function showChecklistModal(callback) { const modal = $('checklist-modal'); cons
     // وضعیت checked قبلی رو نگه می‌دارن. برای همین صریحاً همه رو ریست می‌کنیم تا
     // برای هر مکان جدید، پرسشنامه از صفر و خالی شروع بشه.
     checkboxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
-
+ 
     function updateDisabledState() {
         const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
         const reachedLimit = checkedCount >= 2;
@@ -534,12 +534,12 @@ function showChecklistModal(callback) { const modal = $('checklist-modal'); cons
 }
 $('modal-submit').onclick = () => { const modal = $('checklist-modal'); const selected = Array.from(modal.querySelectorAll('.check-group input:checked')).map(cb => cb.value); if(pendingChecklistCallback) pendingChecklistCallback(selected); modal.classList.remove('show'); pendingChecklistCallback=null; };
 $('modal-cancel').onclick = () => { $('checklist-modal').classList.remove('show'); pendingChecklistCallback=null; };
-
+ 
 function updateStatusWithChecklist(newStatus) { const idx = state.selectedIdx; if(idx===null) return; const loc = state.locations[idx]; if(loc.status !== 'pending'){ showToast('نقطه قبلاً ثبت شده'); return; } if(newStatus === 'done'){ showChecklistModal((selected) => { loc.checklist = selected; loc.status = 'done'; loc.note = $('loc-note').value; saveData(); renderAll(); showToast('✅ رسیدم + پرسشنامه ثبت شد'); setTimeout(()=>{ removeRoute(); pickNextTarget(); saveData(); renderAll(); if($('screen-report').classList.contains('active')) renderReport(); },300); }); } else { loc.status = newStatus; loc.note = $('loc-note').value; saveData(); renderAll(); showToast(newStatus==='review'?'⚠️ بررسی':'🔴 پایان کار'); setTimeout(()=>{ removeRoute(); pickNextTarget(); saveData(); renderAll(); if($('screen-report').classList.contains('active')) renderReport(); },300); } }
 $('panel-done-btn').addEventListener('click',()=>updateStatusWithChecklist('done'));
 $('panel-review-btn').addEventListener('click',()=>updateStatusWithChecklist('review'));
 $('panel-final-btn').addEventListener('click',()=>updateStatusWithChecklist('final'));
-
+ 
 function refreshPanelButtons(){ const idx=state.selectedIdx; const doneBtn=$('panel-done-btn'),reviewBtn=$('panel-review-btn'),finalBtn=$('panel-final-btn'); if(idx===null||!state.locations[idx])return; const isPending=state.locations[idx].status==='pending'; doneBtn.disabled=reviewBtn.disabled=finalBtn.disabled=!isPending; doneBtn.style.opacity=reviewBtn.style.opacity=finalBtn.style.opacity=isPending?'1':'0.45'; }
 async function drawRoute(destIdx){
   if(state.userLat===null) return;
@@ -593,12 +593,12 @@ function startTimer(){ if(state.timerInterval)return; state.timerInterval=setInt
 $('pause-resume-btn').addEventListener('click',()=>{ state.isPaused=!state.isPaused; if(state.isPaused){ $('pause-resume-btn').innerHTML='<i class="fas fa-play"></i> <span>ادامه</span>'; $('pause-resume-btn').style.background='var(--success)'; }else{ $('pause-resume-btn').innerHTML='<i class="fas fa-pause"></i> <span>توقف</span>'; $('pause-resume-btn').style.background=''; } });
 function showInspectionUI(){ $('upload-section').classList.add('hidden'); $('inspection-section').classList.remove('hidden'); }
 $('reset-track-btn').addEventListener('click',()=>{ if(confirm('تمام داده‌ها حذف شوند؟')){ localStorage.removeItem(`hn_data_${state.user}`); location.reload(); } });
-$('finish-inspection-btn').addEventListener('click',()=>{ saveData(); generatePDF(); });
+$('finish-inspection-btn').addEventListener('click',()=>{ saveData(); generatePDF().catch(()=> showToast('❌ ساخت PDF با خطا مواجه شد')); });
 $('end-mission-btn').addEventListener('click', () => {
   const visitedCount = state.locations.filter(l => l.status !== 'pending').length;
   if(visitedCount === 0){ showToast('هنوز هیچ نقطه‌ای امروز ثبت نشده'); return; }
   if(!confirm(`${visitedCount} نقطه‌ی بازدیدشده‌ی امروز ابتدا در یک PDF ذخیره و سپس از لیست حذف می‌شن (نقاطِ در انتظار برای فردا باقی می‌مونن). ادامه می‌دی؟`)) return;
-
+ 
   generatePDF().then(() => {
     // فقط نقاطی که هنوز «در انتظار»ن نگه داشته می‌شن؛ بازدیدشده‌های امروز برای همیشه حذف می‌شن
     state.locations = state.locations.filter(l => l.status === 'pending');
@@ -613,7 +613,7 @@ $('end-mission-btn').addEventListener('click', () => {
     state.lastRouteFetchPos = null;
     removeRoute();
     saveData();
-
+ 
     if(state.locations.length > 0){
       pickNextTarget();
       showToast('✅ ماموریت امروز پایان یافت — نقاط باقی‌مانده برای فردا آماده‌ست');
@@ -628,7 +628,28 @@ $('end-mission-btn').addEventListener('click', () => {
     showToast('❌ ساخت PDF با خطا مواجه شد، چیزی پاک نشد');
   });
 });
-function generatePDF(){ showToast('📄 ساخت PDF...'); const locs=state.locations; let rows=locs.map((loc,i)=>{ const num=loc.bookmarkNum!==null?loc.bookmarkNum:(i+1); let stat=''; if(loc.status==='done') stat='رسیدم'; else if(loc.status==='review') stat='نیاز به بررسی'; else if(loc.status==='final') stat='پایان کار'; else stat='بازرسی نشده'; const checklistText=(loc.status==='done' && loc.checklist?.length)?`<br><small>📋 ${loc.checklist.join(', ')}</small>`:''; return `<tr><td style="padding:7px;border-bottom:1px solid #ddd;">${num} - ${loc.name}</td><td style="padding:7px;border-bottom:1px solid #ddd;">${stat}</td><td style="padding:7px;border-bottom:1px solid #ddd;">${loc.note||'—'}${checklistText}</td></tr>`; }).join(''); const el=document.createElement('div'); el.style.cssText='padding:20px;direction:rtl;font-family:Vazirmatn,sans-serif;'; el.innerHTML=`<div style="border:2px solid #1565c0;padding:16px;border-radius:8px;"><h2 style="text-align:center;color:#1565c0;">گزارش بازرسی</h2><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span><b>ناظر:</b> ${state.user}</span><span><b>زمان:</b> ${$('total-timer').textContent}</span><span><b>تاریخ:</b> ${new Date().toLocaleDateString('fa-IR')}</span></div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1565c0;color:#fff;"><th style="padding:8px;">نام</th><th style="padding:8px;">وضعیت</th><th style="padding:8px;">یادداشت/پرسشنامه</th></tr></thead><tbody>${rows}</tbody></table></div>`; return html2pdf().from(el).set({margin:8,filename:`Report_${state.user}_${new Date().toISOString().slice(0,10)}.pdf`,jsPDF:{orientation:'portrait',format:'a4'}}).save().then(()=>showToast('✅ PDF ذخیره شد')); }
+function generatePDF(){
+  showToast('📄 ساخت PDF...');
+  const locs = state.locations;
+  let rows = locs.map((loc,i)=>{ const num=loc.bookmarkNum!==null?loc.bookmarkNum:(i+1); let stat=''; if(loc.status==='done') stat='رسیدم'; else if(loc.status==='review') stat='نیاز به بررسی'; else if(loc.status==='final') stat='پایان کار'; else stat='بازرسی نشده'; const checklistText=(loc.status==='done' && loc.checklist?.length)?`<br><small>📋 ${loc.checklist.join(', ')}</small>`:''; return `<tr><td style="padding:7px;border-bottom:1px solid #ddd;">${num} - ${loc.name}</td><td style="padding:7px;border-bottom:1px solid #ddd;">${stat}</td><td style="padding:7px;border-bottom:1px solid #ddd;">${loc.note||'—'}${checklistText}</td></tr>`; }).join('');
+  const el = document.createElement('div');
+  // علت کرش: html2canvas برای اندازه‌گیری و رندر کردن، نیاز داره المان واقعاً
+  // داخل سند (DOM) باشه؛ وگرنه عرض/ارتفاعش صفر حساب می‌شه و خطا می‌ده.
+  // این المان رو موقتاً خارج از دید کاربر (left:-9999px) به body اضافه می‌کنیم.
+  el.style.cssText = 'position:fixed; top:0; left:-9999px; width:780px; background:#fff; color:#000; padding:20px; direction:rtl; font-family:Vazirmatn,sans-serif;';
+  el.innerHTML = `<div style="border:2px solid #1565c0;padding:16px;border-radius:8px;"><h2 style="text-align:center;color:#1565c0;">گزارش بازرسی</h2><div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span><b>ناظر:</b> ${state.user}</span><span><b>زمان:</b> ${$('total-timer').textContent}</span><span><b>تاریخ:</b> ${new Date().toLocaleDateString('fa-IR')}</span></div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1565c0;color:#fff;"><th style="padding:8px;">نام</th><th style="padding:8px;">وضعیت</th><th style="padding:8px;">یادداشت/پرسشنامه</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  document.body.appendChild(el);
+ 
+  return html2pdf().from(el).set({
+    margin: 8,
+    filename: `Report_${state.user}_${new Date().toISOString().slice(0,10)}.pdf`,
+    jsPDF: { orientation: 'portrait', format: 'a4' },
+    html2canvas: { backgroundColor: '#ffffff', useCORS: true }
+  }).save()
+  .then(() => { showToast('✅ PDF ذخیره شد'); })
+  .catch(err => { console.error('PDF generation failed:', err); throw err; })
+  .finally(() => { el.remove(); });
+}
 let toastTimer; function showToast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
 </script>
 </body>
